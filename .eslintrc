@@ -1,0 +1,17 @@
+{
+    "env": {
+      "browser": true,
+      "es6": true
+    },
+    "plugins": [
+      "react",
+      "react-hooks",
+      "eslint-plugin-prettier"
+    ],
+    "rules": {
+      "react-hooks/rules-of-hooks": "error",
+      "react-hooks/exhaustive-deps": "warn",
+      "react/jsx-filename-extension": [1, { "extensions": [".js", ".jsx"] }]
+    },
+    "parser": "babel-eslint"
+}
