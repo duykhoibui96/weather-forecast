@@ -1,6 +1,4 @@
-import "bootstrap/dist/css/bootstrap.min.css";
-
-import WeatherForecast from "./components/WeatherForecast";
+import WeatherForecast from "./components/weather-forecast";
 
 function App() {
   return (
