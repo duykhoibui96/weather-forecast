@@ -30,54 +30,50 @@ function WeatherForecast() {
     setLocation(location);
   }
 
+  async function searchWeatherInfo(location) {
+    const { woeid } = location;
+
+    try {
+      const { consolidated_weather: weatherInfoList } =
+        await WeatherRestClient.searchWeatherInformation(woeid);
+      setDailyWeatherInfoList(
+        weatherInfoList
+          .splice(
+            Math.max(weatherInfoList.length - MAXIMUM_SEARCHING_DAY_COUNT, 0)
+          )
+          .map((dailyInfo) => {
+            const {
+              id: key,
+              weather_state_name: weatherStateName,
+              weather_state_abbr: weatherAbbr,
+              applicable_date: applicableDate,
+              min_temp: minTemp,
+              max_temp: maxTemp,
+            } = dailyInfo;
+
+            return {
+              key,
+              weatherStateName,
+              weatherImagePath:
+                WeatherStaticResourceClient.getWeatherStateImagePath(
+                  weatherAbbr
+                ),
+              minTemp: Math.floor(minTemp),
+              maxTemp: Math.floor(maxTemp),
+              ...parseDate(applicableDate),
+            };
+          })
+      );
+    } finally {
+      setloading(false);
+    }
+  }
+
   useEffect(() => {
     setDailyWeatherInfoList([]);
 
     if (location) {
       setloading(true);
-      async function searchWeatherInfo(location) {
-        const { woeid } = location;
-
-        try {
-          const { consolidated_weather: weatherInfoList } =
-            await WeatherRestClient.searchWeatherInformation(woeid);
-          setDailyWeatherInfoList(
-            weatherInfoList
-              .splice(
-                Math.max(
-                  weatherInfoList.length - MAXIMUM_SEARCHING_DAY_COUNT,
-                  0
-                )
-              )
-              .map((dailyInfo) => {
-                const {
-                  id: key,
-                  weather_state_name: weatherStateName,
-                  weather_state_abbr: weatherAbbr,
-                  applicable_date: applicableDate,
-                  min_temp: minTemp,
-                  max_temp: maxTemp,
-                } = dailyInfo;
-
-                return {
-                  key,
-                  weatherStateName,
-                  weatherImagePath:
-                    WeatherStaticResourceClient.getWeatherStateImagePath(
-                      weatherAbbr
-                    ),
-                  minTemp: Math.floor(minTemp),
-                  maxTemp: Math.floor(maxTemp),
-                  ...parseDate(applicableDate),
-                };
-              })
-          );
-        } catch (ignored) {
-        } finally {
-          setloading(false);
-        }
-      }
-
       searchWeatherInfo(location);
     } else {
       setloading(false);

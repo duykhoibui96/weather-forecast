@@ -36,7 +36,6 @@ function SuggestionSearch(props) {
         try {
           const suggestions = await handleLoadSuggestions(keyword);
           setSuggestions(suggestions);
-        } catch (ignored) {
         } finally {
           setLoading(false);
         }

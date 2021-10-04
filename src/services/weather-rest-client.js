@@ -1,7 +1,4 @@
-import {
-  PROXY_URL,
-  METAWEATHER_API_URL
-} from "../config";
+import { PROXY_URL, METAWEATHER_API_URL } from "../config";
 import RestClient from "../utils/rest-client";
 
 class MetaWeatherRestClient extends RestClient {
