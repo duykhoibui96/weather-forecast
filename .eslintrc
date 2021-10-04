@@ -6,12 +6,14 @@
     "plugins": [
       "react",
       "react-hooks",
+      "prettier",
       "eslint-plugin-prettier"
     ],
     "rules": {
       "react-hooks/rules-of-hooks": "error",
       "react-hooks/exhaustive-deps": "warn",
-      "react/jsx-filename-extension": [1, { "extensions": [".js", ".jsx"] }]
+      "react/jsx-filename-extension": [1, { "extensions": [".js", ".jsx"] }],
+      "prettier/prettier": "error"
     },
     "parser": "babel-eslint"
 }

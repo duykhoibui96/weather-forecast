@@ -1,4 +1,5 @@
-import WeatherForecast from "./components/weather-forecast";
+import './app.css'
+import WeatherForecast from './components/weather-forecast';
 
 function App() {
   return (
@@ -6,4 +7,4 @@ function App() {
   );
 }
 
-export default App;
+export default App
