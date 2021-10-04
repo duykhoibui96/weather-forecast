@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import PropTypes from "prop-types";
 import { debounce } from "lodash";
-import { Card, ListGroup, Spinner } from "react-bootstrap";
+import { Card, ListGroup, Spinner, Alert } from "react-bootstrap";
 import SearchField from "../core/search-field";
 
 function SuggestionSearch(props) {
@@ -17,13 +17,15 @@ function SuggestionSearch(props) {
   const [keyword, setKeyword] = useState("");
   const [suggestions, setSuggestions] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [hasError, setHasError] = useState(false);
 
   function resetKeyword() {
-    setKeyword("");
+    handleKeywordChange("");
   }
 
   function handleKeywordChange(keyword) {
     setKeyword(keyword);
+    setHasError(false);
   }
 
   useEffect(() => {
@@ -33,10 +35,13 @@ function SuggestionSearch(props) {
       setLoading(true);
 
       const debounceSearch = debounce(async (keyword) => {
+        let suggestions = [];
         try {
-          const suggestions = await handleLoadSuggestions(keyword);
-          setSuggestions(suggestions);
+          suggestions = await handleLoadSuggestions(keyword);
+        } catch (ignored) {
+          setHasError(true);
         } finally {
+          setSuggestions(suggestions);
           setLoading(false);
         }
       }, debounceSuggestionLoadingTimeInMs);
@@ -70,29 +75,39 @@ function SuggestionSearch(props) {
         onSubmit={selectFirstSuggestionIfAny}
       />
       <div>
-        {(loading || !!suggestions.length) && (
+        {keyword && (
           <Card body className="search-suggestion__wrapper">
-            <ListGroup className="search-suggestion__list">
-              {suggestions.map((suggestion, index = 0) => {
-                const keyVal = suggestion[suggestionKeyAttribute] || index;
+            {suggestions.length ? (
+              <ListGroup className="search-suggestion__list">
+                {suggestions.map((suggestion, index = 0) => {
+                  const keyVal = suggestion[suggestionKeyAttribute] || index;
 
-                function handleSearchBySuggestion() {
-                  return search(suggestion);
-                }
+                  function handleSearchBySuggestion() {
+                    return search(suggestion);
+                  }
 
-                return (
-                  <ListGroup.Item
-                    className="search-suggestion__item"
-                    aria-selected={index === 0}
-                    action
-                    key={keyVal}
-                    onClick={handleSearchBySuggestion}
-                  >
-                    {renderSuggestion(suggestion)}
-                  </ListGroup.Item>
-                );
-              })}
-            </ListGroup>
+                  return (
+                    <ListGroup.Item
+                      className="search-suggestion__item"
+                      aria-selected={index === 0}
+                      action
+                      key={keyVal}
+                      onClick={handleSearchBySuggestion}
+                    >
+                      {renderSuggestion(suggestion)}
+                    </ListGroup.Item>
+                  );
+                })}
+              </ListGroup>
+            ) : (
+              !loading && (
+                <Alert variant={hasError ? "danger" : "warning"}>
+                  {hasError
+                    ? "Unexpected errors happen! Please try again!"
+                    : "No locations found! Please make sure you type the correct location."}
+                </Alert>
+              )
+            )}
             <div className="center pt-3">
               {loading && <Spinner animation="border" />}
             </div>
