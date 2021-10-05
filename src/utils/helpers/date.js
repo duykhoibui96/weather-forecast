@@ -1,5 +1,5 @@
 import moment from "moment";
-import { DAYS_OF_WEEK } from "../constants";
+import { DAYS_OF_WEEK } from "../../constants";
 
 const FORMAT_DATE_STRING = "DD/MM";
 

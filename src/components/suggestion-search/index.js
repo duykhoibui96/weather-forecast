@@ -1,9 +1,8 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import PropTypes from "prop-types";
-import { debounce } from "lodash";
 import { Card, ListGroup, Spinner, Alert } from "react-bootstrap";
+import useFetchingData from "../../utils/hooks/use-fetching-data";
 import SearchField from "../core/search-field";
-
 function SuggestionSearch(props) {
   const {
     placeholder,
@@ -15,44 +14,13 @@ function SuggestionSearch(props) {
     disabled,
   } = props;
   const [keyword, setKeyword] = useState("");
-  const [suggestions, setSuggestions] = useState([]);
-  const [loading, setLoading] = useState(false);
-  const [hasError, setHasError] = useState(false);
-
   function resetKeyword() {
     handleKeywordChange("");
   }
 
   function handleKeywordChange(keyword) {
     setKeyword(keyword);
-    setHasError(false);
   }
-
-  useEffect(() => {
-    setSuggestions([]);
-
-    if (keyword) {
-      setLoading(true);
-
-      const debounceSearch = debounce(async (keyword) => {
-        let suggestions = [];
-        try {
-          suggestions = await handleLoadSuggestions(keyword);
-        } catch (ignored) {
-          setHasError(true);
-        } finally {
-          setSuggestions(suggestions);
-          setLoading(false);
-        }
-      }, debounceSuggestionLoadingTimeInMs);
-
-      debounceSearch(keyword);
-
-      return () => debounceSearch.cancel();
-    } else {
-      setLoading(false);
-    }
-  }, [keyword, handleLoadSuggestions, debounceSuggestionLoadingTimeInMs]);
 
   function selectFirstSuggestionIfAny() {
     if (suggestions.length) {
@@ -64,6 +32,16 @@ function SuggestionSearch(props) {
     onSearch(suggestion);
     resetKeyword();
   }
+
+  const {
+    loading,
+    hasError,
+    data: suggestions,
+  } = useFetchingData(
+    keyword,
+    handleLoadSuggestions,
+    debounceSuggestionLoadingTimeInMs
+  );
 
   return (
     <>
@@ -77,7 +55,7 @@ function SuggestionSearch(props) {
       <div>
         {keyword && (
           <Card body className="search-suggestion__wrapper">
-            {suggestions.length ? (
+            {suggestions && suggestions.length ? (
               <ListGroup className="search-suggestion__list">
                 {suggestions.map((suggestion, index = 0) => {
                   const keyVal = suggestion[suggestionKeyAttribute] || index;

@@ -1,6 +1,7 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { Badge, Alert, Container, Row, Col, Spinner } from "react-bootstrap";
-import { parseDate } from "../../utils/date";
+import { parseDate } from "../../utils/helpers/date";
+import useFetchingData from "../../utils/hooks/use-fetching-data";
 import WeatherRestClient from "../../services/weather-rest-client";
 import WeatherStaticResourceClient from "../../services/weather-static-resource-client";
 import SuggestionSearch from "../suggestion-search";
@@ -13,68 +14,46 @@ function loadLocationSuggestions(keyword) {
   return WeatherRestClient.searchLocation(keyword);
 }
 
+async function loadWeatherInfo({ woeid }) {
+  const { consolidated_weather: weatherInfoList } =
+    await WeatherRestClient.searchWeatherInformation(woeid);
+
+  return weatherInfoList
+    .splice(Math.max(weatherInfoList.length - MAXIMUM_SEARCHING_DAY_COUNT, 0))
+    .map((dailyInfo) => {
+      const {
+        id: key,
+        weather_state_name: weatherStateName,
+        weather_state_abbr: weatherAbbr,
+        applicable_date: applicableDate,
+        min_temp: minTemp,
+        max_temp: maxTemp,
+      } = dailyInfo;
+
+      return {
+        key,
+        weatherStateName,
+        weatherImagePath:
+          WeatherStaticResourceClient.getWeatherStateImagePath(weatherAbbr),
+        minTemp: Math.floor(minTemp),
+        maxTemp: Math.floor(maxTemp),
+        ...parseDate(applicableDate),
+      };
+    });
+}
+
 function Main() {
-  const [loading, setloading] = useState(false);
   const [location, setLocation] = useState(null);
-  const [hasError, setHasError] = useState(false);
-  const [dailyWeatherInfoList, setDailyWeatherInfoList] = useState([]);
 
   function handleSearchWeatherInfo(location) {
     setLocation(location);
-    setHasError(false);
   }
 
-  async function searchWeatherInfo(location) {
-    const { woeid } = location;
-
-    try {
-      const { consolidated_weather: weatherInfoList } =
-        await WeatherRestClient.searchWeatherInformation(woeid);
-      setDailyWeatherInfoList(
-        weatherInfoList
-          .splice(
-            Math.max(weatherInfoList.length - MAXIMUM_SEARCHING_DAY_COUNT, 0)
-          )
-          .map((dailyInfo) => {
-            const {
-              id: key,
-              weather_state_name: weatherStateName,
-              weather_state_abbr: weatherAbbr,
-              applicable_date: applicableDate,
-              min_temp: minTemp,
-              max_temp: maxTemp,
-            } = dailyInfo;
-
-            return {
-              key,
-              weatherStateName,
-              weatherImagePath:
-                WeatherStaticResourceClient.getWeatherStateImagePath(
-                  weatherAbbr
-                ),
-              minTemp: Math.floor(minTemp),
-              maxTemp: Math.floor(maxTemp),
-              ...parseDate(applicableDate),
-            };
-          })
-      );
-    } catch (ignored) {
-      setHasError(true);
-    } finally {
-      setloading(false);
-    }
-  }
-
-  useEffect(() => {
-    setDailyWeatherInfoList([]);
-
-    if (location) {
-      setloading(true);
-      searchWeatherInfo(location);
-    } else {
-      setloading(false);
-    }
-  }, [location]);
+  const {
+    loading,
+    hasError,
+    data: dailyWeatherInfoList,
+  } = useFetchingData(location, loadWeatherInfo);
 
   return (
     <>
@@ -113,6 +92,8 @@ function Main() {
                   Unexpected errors happen! Please try again!
                 </Alert>
               ) : (
+                dailyWeatherInfoList &&
+                dailyWeatherInfoList.length &&
                 dailyWeatherInfoList.map(({ key, ...props }) => (
                   <Col key={key}>
                     <WeatherInfo {...props} />
