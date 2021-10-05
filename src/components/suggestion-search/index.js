@@ -54,7 +54,7 @@ function SuggestionSearch(props) {
       />
       <div>
         {keyword && (
-          <Card body className="search-suggestion__wrapper">
+          <Card aria-label="search-suggestion-wrapper" body className="search-suggestion__wrapper">
             {suggestions && suggestions.length ? (
               <ListGroup className="search-suggestion__list">
                 {suggestions.map((suggestion, index = 0) => {
@@ -82,12 +82,12 @@ function SuggestionSearch(props) {
                 <Alert variant={hasError ? "danger" : "warning"}>
                   {hasError
                     ? "Unexpected errors happen! Please try again!"
-                    : "No locations found! Please make sure you type the correct location."}
+                    : "No data found! Please make sure you type the correct input."}
                 </Alert>
               )
             )}
             <div className="center pt-3">
-              {loading && <Spinner animation="border" />}
+              {loading && <Spinner aria-label="search-suggestion-loading-spinner" animation="border" />}
             </div>
           </Card>
         )}
