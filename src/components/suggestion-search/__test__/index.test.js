@@ -28,7 +28,7 @@ function renderComponent(placeholder = PLACEHOLDER, disabled = false) {
 
     return [];
   });
-  const renderSuggestion = ({ title }) => <div>{title}</div>;
+  const renderSuggestion = ({ title }) => <span>{title}</span>;
 
   render(
     <SuggestionSearch
@@ -53,27 +53,31 @@ describe("SuggestionSearch", () => {
     const searchSuggestionWrapper = screen.queryByLabelText(
       "search-suggestion-wrapper"
     );
-    expect(searchSuggestionWrapper).not.toBeInTheDocument();
+    expect(searchSuggestionWrapper).toBeNull();
   });
 
-  it("should show search suggestion when typing any key words", () => {
+  it("should show search suggestion when typing any key words", async () => {
     renderComponent();
     const searchField = screen.getByPlaceholderText(PLACEHOLDER);
     fireEvent.change(searchField, { target: { value: "any keyword" } });
-    const searchSuggestionWrapper = screen.queryByLabelText(
+
+    const searchSuggestionWrapper = await screen.findByLabelText(
       "search-suggestion-wrapper"
     );
-    expect(searchSuggestionWrapper).toBeInTheDocument();
+    expect(searchSuggestionWrapper).toBeVisible();
   });
 
-  it("should show loading spinner when typing any key words", () => {
+  it("should show loading spinner when typing any key words", async () => {
     renderComponent();
     const searchField = screen.getByPlaceholderText(PLACEHOLDER);
     fireEvent.change(searchField, { target: { value: "any keyword" } });
-    const searchSuggestionLoadingSpinner = screen.queryByLabelText(
-      "search-suggestion-loading-spinner"
-    );
-    expect(searchSuggestionLoadingSpinner).toBeInTheDocument();
+
+    await waitFor(() => {
+      const spinner = screen.getByLabelText(
+        "search-suggestion-loading-spinner"
+      );
+      expect(spinner).toBeVisible();
+    });
   });
 
   it("should load suggestions", async () => {
@@ -96,16 +100,15 @@ describe("SuggestionSearch", () => {
     });
 
     await waitFor(() => {
-      // Ensure loading spinner not displayed
-      const searchSuggestionWrapper = screen.queryByLabelText(
-        "search-suggestion-loading-spinner"
-      );
-      expect(searchSuggestionWrapper).not.toBeInTheDocument();
-
       SUGGESTIONS.forEach(({ title }) =>
-        expect(screen.queryByText(title)).toBeInTheDocument()
+        expect(screen.getByText(title)).toBeVisible()
       );
     });
+
+    // Not showing loading spinner icon when suggestions are displayed
+    expect(
+      screen.queryByLabelText("search-suggestion-loading-spinner")
+    ).toBeNull();
   });
 
   it("should show valid message when no suggestions found", async () => {
@@ -115,18 +118,16 @@ describe("SuggestionSearch", () => {
       target: { value: SUGGESTION_NOT_FOUND_KEYWORD },
     });
 
-    await waitFor(() => {
-      // Ensure loading spinner not displayed
-      const searchSuggestionWrapper = screen.queryByLabelText(
-        "search-suggestion-loading-spinner"
-      );
-      expect(searchSuggestionWrapper).not.toBeInTheDocument();
+    const message = await screen.findByText(
+      "No data found! Please make sure you type the correct input."
+    );
 
-      const noSuggestionFoundMessage = screen.queryByText(
-        "No data found! Please make sure you type the correct input."
-      );
-      expect(noSuggestionFoundMessage).toBeInTheDocument();
-    });
+    expect(message).toBeVisible();
+
+    // Not showing loading spinner icon when suggestions not found
+    expect(
+      screen.queryByLabelText("search-suggestion-loading-spinner")
+    ).toBeNull();
   });
 
   it("should show error message when exceptions fired from fetching suggestions", async () => {
@@ -136,59 +137,49 @@ describe("SuggestionSearch", () => {
       target: { value: EXCEPTION_THROWN_KEYWORD },
     });
 
-    await waitFor(() => {
-      // Ensure loading spinner not displayed
-      const searchSuggestionWrapper = screen.queryByLabelText(
-        "search-suggestion-loading-spinner"
-      );
-      expect(searchSuggestionWrapper).not.toBeInTheDocument();
+    const message = await screen.findByText(
+      "Unexpected errors happen! Please try again!"
+    );
 
-      const noSuggestionFoundMessage = screen.queryByText(
-        "Unexpected errors happen! Please try again!"
-      );
-      expect(noSuggestionFoundMessage).toBeInTheDocument();
-    });
+    expect(message).toBeVisible();
+
+    // Not showing loading spinner icon when encoutering exceptions
+    expect(
+      screen.queryByLabelText("search-suggestion-loading-spinner")
+    ).toBeNull();
   });
 
   it("should submit the first suggestion when clicking on Search button", async () => {
-    const { handleSearch } = renderComponent();
+    const { handleSearch, handleLoadSuggestions } = renderComponent();
     const searchField = screen.getByPlaceholderText(PLACEHOLDER);
     fireEvent.change(searchField, {
       target: { value: SUGGESTION_FOUND_KEYWORD },
     });
 
     await waitFor(() => {
-      // Ensure loading spinner not displayed
-      const searchSuggestionWrapper = screen.queryByLabelText(
-        "search-suggestion-loading-spinner"
-      );
-      expect(searchSuggestionWrapper).not.toBeInTheDocument();
-
-      const submitButton = screen.getByLabelText("submit-button");
-      fireEvent.click(submitButton);
-
-      expect(handleSearch).toHaveBeenCalledWith(SUGGESTIONS[0]);
+      expect(handleLoadSuggestions).toHaveBeenCalled();
     });
+
+    const submitButton = screen.getByLabelText("submit-button");
+    fireEvent.click(submitButton);
+
+    expect(handleSearch).toHaveBeenCalledWith(SUGGESTIONS[0]);
   });
 
   it("should submit the right selected suggestion", async () => {
-    const { handleSearch } = renderComponent();
+    const { handleSearch, handleLoadSuggestions } = renderComponent();
     const searchField = screen.getByPlaceholderText(PLACEHOLDER);
     fireEvent.change(searchField, {
       target: { value: SUGGESTION_FOUND_KEYWORD },
     });
 
     await waitFor(() => {
-      // Ensure loading spinner not displayed
-      const searchSuggestionWrapper = screen.queryByLabelText(
-        "search-suggestion-loading-spinner"
-      );
-      expect(searchSuggestionWrapper).not.toBeInTheDocument();
-
-      const secondItem = screen.getByText(SUGGESTIONS[1].title);
-      fireEvent.click(secondItem);
-
-      expect(handleSearch).toHaveBeenCalledWith(SUGGESTIONS[1]);
+      expect(handleLoadSuggestions).toHaveBeenCalled();
     });
+
+    const secondItem = screen.getByText(SUGGESTIONS[1].title);
+    fireEvent.click(secondItem);
+
+    expect(handleSearch).toHaveBeenCalledWith(SUGGESTIONS[1]);
   });
 });

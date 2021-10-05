@@ -13,7 +13,11 @@ function Error({ onRetry }) {
         </p>
         <hr />
         <div className="d-flex justify-content-end">
-          <Button onClick={onRetry} variant="outline-danger">
+          <Button
+            aria-label="retry-btn"
+            onClick={onRetry}
+            variant="outline-danger"
+          >
             Retry
           </Button>
         </div>

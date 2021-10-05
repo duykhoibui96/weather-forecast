@@ -22,7 +22,7 @@ async function loadWeatherInfo({ woeid }) {
     .splice(Math.max(weatherInfoList.length - MAXIMUM_SEARCHING_DAY_COUNT, 0))
     .map((dailyInfo) => {
       const {
-        id: key,
+        id,
         weather_state_name: weatherStateName,
         weather_state_abbr: weatherAbbr,
         applicable_date: applicableDate,
@@ -31,7 +31,8 @@ async function loadWeatherInfo({ woeid }) {
       } = dailyInfo;
 
       return {
-        key,
+        key: id,
+        id,
         weatherStateName,
         weatherImagePath:
           WeatherStaticResourceClient.getWeatherStateImagePath(weatherAbbr),
@@ -95,7 +96,7 @@ function Main() {
                 dailyWeatherInfoList &&
                 dailyWeatherInfoList.length &&
                 dailyWeatherInfoList.map(({ key, ...props }) => (
-                  <Col key={key}>
+                  <Col className="card__item" key={key} sm="12" md>
                     <WeatherInfo {...props} />
                   </Col>
                 ))

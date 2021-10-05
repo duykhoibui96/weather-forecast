@@ -71,6 +71,7 @@ function SuggestionSearch(props) {
                   return (
                     <ListGroup.Item
                       className="search-suggestion__item"
+                      aria-label="suggestion"
                       aria-selected={index === 0}
                       action
                       key={keyVal}

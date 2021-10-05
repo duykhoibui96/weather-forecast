@@ -31,3 +31,7 @@
 .search-suggestion__item[aria-selected="true"] {
   background-color: lightgrey;
 }
+
+.card__item {
+  margin-bottom: 10px;
+}
