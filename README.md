@@ -17,7 +17,7 @@ Yarn v1.22.10
 In the project directory, you can run:
 ### `yarn start-proxy`
 
-Runs the reversed proxy server in the development mode.\
+Runs the proxy server in the development mode.\
 The proxy server will run on [http://localhost:8080](http://localhost:8080) to forward all frontend requests to the Metaweather API server.
 
 ### `yarn start`
@@ -46,3 +46,24 @@ See the section about [deployment](https://facebook.github.io/create-react-app/d
 ### `yarn lint`
 
 Run and fix any eslint issues.
+
+## Environment variables
+The web app accepts these below environment variables
+
+```
+
+/* specify the proxy server url to help the web app bypass CORS issues when dealing with Metaweather API - default value is http://localhost:8080 */
+export PROXY_URL = 'http://localhost:8080'
+
+/* specify the Metaweather api url - default value is https://www.metaweather.com/api */
+export METAWEATHER_API_URL = 'https://www.metaweather.com/api'
+
+/* specify the Metaweather static resource fetching url - default value is https://www.metaweather.com/static */
+export METAWEATHER_STATIC_RESOURCE_URL = 'https://www.metaweather.com/static'
+```
+
+## Deployment
+
+The web app is deployed to [Heroku](http://www.heroku.com/). You can access the app via this link https://khoibui-weather-forecast.herokuapp.com/.
+
+Besides, I also deployed a proxy server [here](https://khoibui-cors-proxy.herokuapp.com/) to deal with CORS issues when fetching Metaweather API.
