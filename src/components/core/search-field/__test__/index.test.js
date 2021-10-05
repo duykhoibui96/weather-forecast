@@ -1,60 +1,50 @@
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import SearchField from "../";
 
+const KEYWORD = "Ho Chi Minh City";
+const PLACEHOLDER = "Type a location";
+
+function renderComponent(
+  keyword = KEYWORD,
+  placeholder = PLACEHOLDER,
+  disabled = false
+) {
+  const handleKeywordChange = jest.fn();
+  const handleSubmit = jest.fn();
+
+  render(
+    <SearchField
+      keyword={keyword}
+      placeholder={placeholder}
+      onKeywordChange={handleKeywordChange}
+      onSubmit={handleSubmit}
+      disabled={disabled}
+    />
+  );
+
+  return { handleKeywordChange, handleSubmit };
+}
+
 describe("SearchField", () => {
-    it("should receive keyword prop", () => {
-        const keyword = "Ho Chi Minh City";
-        const placeholder = "Type a location"
-        render(
-            <SearchField
-                keyword={keyword}
-                placeholder={placeholder}
-                onKeywordChange={() => {}}
-                onSubmit={() => {}}
-            />
-        );
-        const searchField = screen.getByPlaceholderText(placeholder);    
-        expect(searchField.value).toBe(keyword);
-    });
+  it("should display right keyword", () => {
+    renderComponent();
+    const searchField = screen.getByPlaceholderText(PLACEHOLDER);
+    expect(searchField.value).toBe(KEYWORD);
+  });
 
-    it("should change keyword", () => {
-        const keyword = "Ho Chi Minh City";
-        const placeholder = "Type a location";
+  it("should change keyword", () => {
+    const { handleKeywordChange } = renderComponent();
+    const searchField = screen.getByPlaceholderText(PLACEHOLDER);
+    fireEvent.change(searchField, { target: { value: "any" } });
 
-        let receivedNewKeyword
-        render(
-            <SearchField
-                keyword={keyword}
-                placeholder={placeholder}
-                onKeywordChange={(keyword) => {
-                    receivedNewKeyword = keyword
-                }}
-                onSubmit={() => {}}
-            />
-        );
+    expect(handleKeywordChange).toHaveBeenCalled();
+  });
 
-        const expectedNewKeyword = "Ha Noi";
-        const searchField = screen.getByPlaceholderText(placeholder);
-        fireEvent.change(searchField, { target: { value: expectedNewKeyword } });
-        expect(receivedNewKeyword).toBe(expectedNewKeyword);
-    });
+  it("should receive form submit event", () => {
+    const { handleSubmit } = renderComponent();
 
-    it("should receive form submit event", () => {
-        const keyword = "Ho Chi Minh City";
-        const placeholder = "Type a location";
-
-        const handleSubmit = jest.fn()
-        render(
-            <SearchField
-                keyword={keyword}
-                placeholder={placeholder}
-                onKeywordChange={() => {}}
-                onSubmit={handleSubmit}
-            />
-        );
-
-        const submitButton = screen.getByLabelText("submit-button");
-        fireEvent.click(submitButton);
-        expect(handleSubmit).toHaveBeenCalled();
-    });
-})
+    const submitButton = screen.getByLabelText("submit-button");
+    fireEvent.click(submitButton);
+    expect(handleSubmit).toHaveBeenCalled();
+  });
+});

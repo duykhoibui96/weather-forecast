@@ -30,7 +30,12 @@ function SearchField({
           onChange={handleKeywordChange}
           disabled={disabled}
         />
-        <Button aria-label="submit-button" variant="dark" type="submit" disabled={disabled}>
+        <Button
+          aria-label="submit-button"
+          variant="dark"
+          type="submit"
+          disabled={disabled}
+        >
           Search
         </Button>
       </InputGroup>
