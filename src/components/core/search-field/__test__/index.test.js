@@ -1,8 +1,8 @@
-import { render, screen, fireEvent } from "@testing-library/react";
+import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import SearchField from "../";
 
 describe("SearchField", () => {
-    it("should receive keyword prop", async () => {
+    it("should receive keyword prop", () => {
         const keyword = "Ho Chi Minh City";
         const placeholder = "Type a location"
         render(
@@ -17,7 +17,7 @@ describe("SearchField", () => {
         expect(searchField.value).toBe(keyword);
     });
 
-    it("should change keyword", async () => {
+    it("should change keyword", () => {
         const keyword = "Ho Chi Minh City";
         const placeholder = "Type a location";
 
@@ -39,24 +39,22 @@ describe("SearchField", () => {
         expect(receivedNewKeyword).toBe(expectedNewKeyword);
     });
 
-    it("should receive form submit event", async () => {
+    it("should receive form submit event", () => {
         const keyword = "Ho Chi Minh City";
         const placeholder = "Type a location";
 
-        let formSubmitted = false
+        const handleSubmit = jest.fn()
         render(
             <SearchField
                 keyword={keyword}
                 placeholder={placeholder}
                 onKeywordChange={() => {}}
-                onSubmit={() => {
-                    formSubmitted = true
-                }}
+                onSubmit={handleSubmit}
             />
         );
 
-        const submitButton = screen.getByRole('button', { type: /submit/i });
+        const submitButton = screen.getByLabelText("submit-button");
         fireEvent.click(submitButton);
-        expect(formSubmitted).toBeTruthy();
+        expect(handleSubmit).toHaveBeenCalled();
     });
 })

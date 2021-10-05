@@ -5,6 +5,7 @@ import { InputGroup, Form, FormControl, Button } from "react-bootstrap";
 function SearchField({
   placeholder,
   keyword,
+  required,
   disabled,
   onKeywordChange,
   onSubmit,
@@ -29,7 +30,7 @@ function SearchField({
           onChange={handleKeywordChange}
           disabled={disabled}
         />
-        <Button variant="dark" type="submit" disabled={disabled}>
+        <Button aria-label="submit-button" variant="dark" type="submit" disabled={disabled}>
           Search
         </Button>
       </InputGroup>

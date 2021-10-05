@@ -2,7 +2,7 @@ import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import SuggestionSearch from "../";
 
 describe("SuggestionSearch", () => {
-    it("should not show search suggestion in the first render", async () => {
+    it("should not show search suggestion in the first render", () => {
         render(
             <SuggestionSearch
                 onSearch={() => {}}
@@ -15,7 +15,7 @@ describe("SuggestionSearch", () => {
         expect(searchSuggestionWrapper).not.toBeInTheDocument();
     });
 
-    it("should show search suggestion when typing any key words", async () => {
+    it("should show search suggestion when typing any key words", () => {
         const placeholder = "Type a location";
 
         render(
@@ -33,7 +33,7 @@ describe("SuggestionSearch", () => {
         expect(searchSuggestionWrapper).toBeInTheDocument()
     });
 
-    it("should show loading spinner when typing any key words", async () => {
+    it("should show loading spinner when typing any key words", () => {
         const placeholder = "Type a location";
 
         render(
@@ -111,7 +111,7 @@ describe("SuggestionSearch", () => {
         });
     });
 
-    it("should show error message when exceptions fired from fetching suggestion", async () => {
+    it("should show error message when exceptions fired from fetching suggestions", async () => {
         const placeholder = "Type a location";
 
         render(
@@ -135,6 +135,82 @@ describe("SuggestionSearch", () => {
 
             const noSuggestionFoundMessage = screen.queryByText("Unexpected errors happen! Please try again!")
             expect(noSuggestionFoundMessage).toBeInTheDocument()
+        });
+    });
+
+    it("should submit the first suggestion when clicking on Search button", async () => {
+        const placeholder = "Type a location";
+        const suggestions = [
+            {
+                id: 1,
+                title: 'Suggestion 1'
+            },
+            {
+                id: 2,
+                title: 'Suggestion 2'
+            }
+        ]
+
+        const handleSearch = jest.fn()
+        render(
+            <SuggestionSearch
+                placeholder={placeholder}
+                onSearch={handleSearch}
+                handleLoadSuggestions={() => suggestions}
+                renderSuggestion={({ title }) => <span>{title}</span>}
+                suggestionKeyAttribute="id"
+            />
+        );
+        const searchField = screen.getByPlaceholderText(placeholder);
+        fireEvent.change(searchField, { target: { value: "any keyword" } });
+
+        await waitFor(() => {
+            // Ensure loading spinner not displayed
+            const searchSuggestionWrapper = screen.queryByLabelText("search-suggestion-loading-spinner");
+            expect(searchSuggestionWrapper).not.toBeInTheDocument()
+
+            const submitButton = screen.getByLabelText("submit-button");
+            fireEvent.click(submitButton);
+
+            expect(handleSearch).toHaveBeenCalledWith(suggestions[0])
+        });
+    });
+
+    it("should submit the right selected suggestion", async () => {
+        const placeholder = "Type a location";
+        const suggestions = [
+            {
+                id: 1,
+                title: 'Suggestion 1'
+            },
+            {
+                id: 2,
+                title: 'Suggestion 2'
+            }
+        ]
+
+        const handleSearch = jest.fn()
+        render(
+            <SuggestionSearch
+                placeholder={placeholder}
+                onSearch={handleSearch}
+                handleLoadSuggestions={() => suggestions}
+                renderSuggestion={({ title }) => <span>{title}</span>}
+                suggestionKeyAttribute="id"
+            />
+        );
+        const searchField = screen.getByPlaceholderText(placeholder);
+        fireEvent.change(searchField, { target: { value: "any keyword" } });
+
+        await waitFor(() => {
+            // Ensure loading spinner not displayed
+            const searchSuggestionWrapper = screen.queryByLabelText("search-suggestion-loading-spinner");
+            expect(searchSuggestionWrapper).not.toBeInTheDocument()
+
+            const secondItem = screen.getByText(suggestions[1].title);
+            fireEvent.click(secondItem);
+
+            expect(handleSearch).toHaveBeenCalledWith(suggestions[1])
         });
     });
 })
