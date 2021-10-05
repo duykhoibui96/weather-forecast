@@ -2,6 +2,10 @@
   text-align: center;
 }
 
+.white-text {
+  color: white;
+}
+
 .main__wrapper {
   width: calc(100% - 500px);
   margin: auto;
@@ -14,6 +18,23 @@
 
 .main__header-title {
   margin-bottom: 20px;
+}
+
+.main__text--super-large {
+  margin-bottom: 0px;
+  font-weight: bold;
+  font-size: 40px;
+}
+
+.main__text--large {
+  margin-bottom: 0px;
+  font-weight: bold;
+  font-size: 25px;
+}
+
+.main__text--small {
+  margin-bottom: 0px;
+  font-size: 15px;
 }
 
 .search-suggestion__wrapper {

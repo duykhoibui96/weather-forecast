@@ -6,6 +6,7 @@ import WeatherRestClient from "../../services/weather-rest-client";
 import WeatherStaticResourceClient from "../../services/weather-static-resource-client";
 import SuggestionSearch from "../suggestion-search";
 import WeatherInfo from "./weather-info";
+import { DAYS_OF_WEEK } from "../../constants";
 
 const DEBOUNCE_LOCATION_SUGGESTION_LOADING_TIME_IN_MS = 500;
 const MAXIMUM_SEARCHING_DAY_COUNT = 5;
@@ -28,6 +29,9 @@ async function loadWeatherInfo({ woeid }) {
         applicable_date: applicableDate,
         min_temp: minTemp,
         max_temp: maxTemp,
+        wind_speed: winSpeed,
+        humidity,
+        predictability,
       } = dailyInfo;
 
       return {
@@ -38,6 +42,9 @@ async function loadWeatherInfo({ woeid }) {
           WeatherStaticResourceClient.getWeatherStateImagePath(weatherAbbr),
         minTemp: Math.floor(minTemp),
         maxTemp: Math.floor(maxTemp),
+        winSpeed: Math.floor(winSpeed),
+        humidity,
+        predictability,
         ...parseDate(applicableDate),
       };
     });
@@ -56,6 +63,8 @@ function Main() {
     data: dailyWeatherInfoList,
   } = useFetchingData(location, loadWeatherInfo);
 
+  const todayWeatherInfo = dailyWeatherInfoList && dailyWeatherInfoList[0];
+
   return (
     <>
       <SuggestionSearch
@@ -72,18 +81,51 @@ function Main() {
       {location ? (
         <div className="main__section">
           <h3 className="main__header-title center">
-            {loading ? (
+            {loading && (
               <p>
                 Fetching weather information for{" "}
                 <Badge bg="secondary">{location.title}</Badge> ...
               </p>
-            ) : (
-              <p>
-                Weather information of{" "}
-                <Badge bg="secondary">{location.title}</Badge>
-              </p>
             )}
           </h3>
+          {!loading && todayWeatherInfo && (
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "center",
+                alignItems: "center",
+                marginBottom: 20,
+              }}
+            >
+              <div style={{ textAlign: "left", marginRight: 40 }}>
+                <p className="main__text--large white-text">{location.title}</p>
+                <p className="main__text--small white-text">
+                  {DAYS_OF_WEEK[todayWeatherInfo.dayOfWeek]}{" "}
+                  {todayWeatherInfo.date}
+                </p>
+                <p className="main__text--small white-text">
+                  {todayWeatherInfo.weatherStateName}
+                </p>
+              </div>
+              <div style={{ display: "flex" }}>
+                <img
+                  style={{ marginRight: 10, height: 70 }}
+                  src={todayWeatherInfo.weatherImagePath}
+                />
+                <div style={{ marginRight: 10 }}>
+                  <p className="main__text--small white-text">
+                    Predictability: {todayWeatherInfo.predictability}%
+                  </p>
+                  <p className="main__text--small white-text">
+                    Humidity: {todayWeatherInfo.humidity}%
+                  </p>
+                  <p className="main__text--small white-text">
+                    Win speed: {todayWeatherInfo.winSpeed}mph
+                  </p>
+                </div>
+              </div>
+            </div>
+          )}
           <Container>
             <Row className="justify-content-md-center">
               {loading ? (
@@ -95,8 +137,14 @@ function Main() {
               ) : (
                 dailyWeatherInfoList &&
                 dailyWeatherInfoList.length &&
-                dailyWeatherInfoList.map(({ key, ...props }) => (
-                  <Col className="card__item" key={key} sm="12" md>
+                dailyWeatherInfoList.map(({ key, ...props }, index = 0) => (
+                  <Col
+                    className="card__item"
+                    aria-selected={index === 0}
+                    key={key}
+                    sm="12"
+                    md
+                  >
                     <WeatherInfo {...props} />
                   </Col>
                 ))
