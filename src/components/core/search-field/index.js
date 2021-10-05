@@ -5,7 +5,6 @@ import { InputGroup, Form, FormControl, Button } from "react-bootstrap";
 function SearchField({
   placeholder,
   keyword,
-  required,
   disabled,
   onKeywordChange,
   onSubmit,

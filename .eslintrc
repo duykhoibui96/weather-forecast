@@ -1,7 +1,8 @@
 {
     "env": {
       "browser": true,
-      "es6": true
+      "es6": true,
+      "node": true
     },
     "plugins": [
       "react",
@@ -13,11 +14,22 @@
       "react-hooks/rules-of-hooks": "error",
       "react-hooks/exhaustive-deps": "warn",
       "react/jsx-filename-extension": [1, { "extensions": [".js", ".jsx"] }],
+      "react/react-in-jsx-scope": "off",
       "prettier/prettier": "warn"
     },
     "extends": [
       "eslint:recommended",
       "plugin:react/recommended"
     ],
-    "parser": "babel-eslint"
+    "parser": "babel-eslint",
+    "overrides": [
+      {
+        "files": [
+          "**/*.test.js"
+        ],
+        "env": {
+          "jest": true
+        }
+      }
+    ]
 }
